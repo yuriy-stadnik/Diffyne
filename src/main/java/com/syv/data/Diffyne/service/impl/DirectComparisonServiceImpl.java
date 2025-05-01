@@ -70,7 +70,8 @@ public class DirectComparisonServiceImpl implements DirectComparisonService {
         if (connector2 == null) {
             throw new IllegalArgumentException("Unsupported source type: " + sourceTwoType);
         }
-
+        sourceOneParams.put("primaryKeyField",config.getKeyFields().stream().findFirst().orElse("id"));
+        sourceTwoParams.put("primaryKeyField", config.getKeyFields().stream().findFirst().orElse("id"));
         // Extract data from both sources
         DataSnapshot snapshot1 = connector1.extractSnapshot(sourceOneIdentifier, sourceOneParams);
         DataSnapshot snapshot2 = connector2.extractSnapshot(sourceTwoIdentifier, sourceTwoParams);

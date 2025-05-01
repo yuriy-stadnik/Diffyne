@@ -1,0 +1,47 @@
+# curl -X POST "http://localhost:8080/api/direct-comparisons/rest-api"
+#    -H "Content-Type: application/json"
+#    -d '{
+#      "sourceOneUrl": "http://localhost:8080/rjp/query?connection=DB1&sqlQuery=select%20*%20from%20customer%20where%20id%3C800",
+#      "sourceOneParams": {
+#        "authToken": "your-source1-token",
+#        "recordsPath": "data.items"
+#      },
+#      "sourceTwoUrl": "http://source2.api/query?sqlQuery=select%20*%20from%20customer%20where%20id%20in%20(10%2C11)",
+#      "sourceTwoParams": {
+#        "authToken": "your-source2-token",
+#        "recordsPath": "data.items"
+#      },
+#      "comparisonConfig": {
+#        "keyFields": ["ID"],
+#        "fieldsToCompare": [ "FIRST_NAME", "LAST_NAME" ]
+#      }
+#    }'"http://localhost:8080/rjp/query?connection=DB1&sqlQuery=select%20ID,%20FIRST_NAME||' A'FIRST_NAME,%20LAST_NAME||' 2'%20LAST_NAME%20from%20customer%20where%20id%3C800",
+POST http://localhost:8081/api/direct-comparisons/rest-api
+Content-Type: application/json
+
+{
+      "sourceOneUrl":  "http://localhost:8080/rjp/query?connection=DB1&sqlQuery=select ID,FIRST_NAME||' 01' FIRST_NAME,LAST_NAME||' 01' LAST_NAME from customer where id in (1,2)",
+      "sourceOneParams": {
+        "authToken": "your-source1-token",
+        "recordsPath": "data.items"
+      },
+      "sourceTwoUrl": "http://localhost:8080/rjp/query?connection=DB1&sqlQuery=select * from customer where id in (1,2)",
+      "sourceTwoParams": {
+        "authToken": "your-source2-token",
+        "recordsPath": "data.items"
+      },
+      "comparisonConfig": {
+        "keyFields": ["ID"],
+        "fieldsToCompare": [ "FIRST_NAME", "LAST_NAME" ]
+      }
+    }
+
+<> 2025-04-30T174340.200.json
+<> 2025-04-30T173802.500.json
+<> 2025-04-30T173357.500.json
+
+
+
+
+###
+

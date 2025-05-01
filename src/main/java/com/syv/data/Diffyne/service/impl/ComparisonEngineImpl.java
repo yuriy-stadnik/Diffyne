@@ -59,6 +59,27 @@ public class ComparisonEngineImpl implements ComparisonEngine {
                 RecordDifference difference = new RecordDifference();
                 difference.setPrimaryKeyValue(sourceRecord.getPrimaryKeyValue());
                 difference.setDifferenceType(DifferenceType.SOURCE_ONLY);
+                
+                // Set primary key information
+                String primaryKeyField = keyFields.iterator().next();
+                difference.setPrimaryKeyName(primaryKeyField);
+                
+                // Group related differences
+                Set<RecordDifference> childDifferences = new HashSet<>();
+                for (String field : sourceRecord.getData().keySet()) {
+                    RecordDifference childDiff = new RecordDifference();
+                    childDiff.setFieldName(field);
+                    childDiff.setSourceValue(sourceRecord.getData().get(field));
+                    childDiff.setTargetValue(null);
+                    childDiff.setDifferenceType(DifferenceType.SOURCE_ONLY);
+                    childDiff.setPrimaryKey(keyFields.contains(field));
+                    if (keyFields.contains(field)) {
+                        childDiff.setPrimaryKeyName(field);
+                    }
+                    childDifferences.add(childDiff);
+                }
+                difference.setDifferences(childDifferences);
+                
                 differences.add(difference);
             } else {
                 // Record exists in both sources, compare fields
@@ -73,13 +94,46 @@ public class ComparisonEngineImpl implements ComparisonEngine {
                         // Values don't match
                         recordMatches = false;
 
-                        RecordDifference difference = new RecordDifference();
-                        difference.setPrimaryKeyValue(sourceRecord.getPrimaryKeyValue());
-                        difference.setFieldName(field);
-                        difference.setSourceValue(sourceValue);
-                        difference.setTargetValue(targetValue);
-                        difference.setDifferenceType(DifferenceType.VALUE_MISMATCH);
-                        differences.add(difference);
+                        // Check if we already have a parent difference record for this primary key
+                        RecordDifference parentDifference = null;
+                        for (RecordDifference diff : differences) {
+                            if (diff.getDifferenceType() == DifferenceType.VALUE_MISMATCH && 
+                                diff.getPrimaryKeyValue() != null && 
+                                diff.getPrimaryKeyValue().equals(sourceRecord.getPrimaryKeyValue())) {
+                                parentDifference = diff;
+                                break;
+                            }
+                        }
+                        
+                        // If no parent record found, create one
+                        if (parentDifference == null) {
+                            parentDifference = new RecordDifference();
+                            parentDifference.setPrimaryKeyValue(sourceRecord.getPrimaryKeyValue());
+                            parentDifference.setDifferenceType(DifferenceType.VALUE_MISMATCH);
+                            parentDifference.setPrimaryKeyName(keyFields.iterator().next());
+                            parentDifference.setDifferences(new HashSet<>());
+                            differences.add(parentDifference);
+                        }
+                        
+                        // Create child difference for this field
+                        RecordDifference fieldDifference = new RecordDifference();
+                        fieldDifference.setPrimaryKeyValue(sourceRecord.getPrimaryKeyValue());
+                        fieldDifference.setFieldName(field);
+                        fieldDifference.setSourceValue(sourceValue);
+                        fieldDifference.setTargetValue(targetValue);
+                        fieldDifference.setDifferenceType(DifferenceType.VALUE_MISMATCH);
+                        
+                        // Set primary key information
+                        for (String keyField : keyFields) {
+                            if (keyField.equals(field)) {
+                                fieldDifference.setPrimaryKey(true);
+                                fieldDifference.setPrimaryKeyName(field);
+                                break;
+                            }
+                        }
+                        
+                        // Add to parent's differences collection
+                        parentDifference.getDifferences().add(fieldDifference);
                     }
                 }
 
@@ -102,6 +156,27 @@ public class ComparisonEngineImpl implements ComparisonEngine {
             RecordDifference difference = new RecordDifference();
             difference.setPrimaryKeyValue(targetOnlyRecord.getPrimaryKeyValue());
             difference.setDifferenceType(DifferenceType.TARGET_ONLY);
+            
+            // Set primary key information
+            String primaryKeyField = keyFields.iterator().next();
+            difference.setPrimaryKeyName(primaryKeyField);
+            
+            // Group related differences
+            Set<RecordDifference> childDifferences = new HashSet<>();
+            for (String field : targetOnlyRecord.getData().keySet()) {
+                RecordDifference childDiff = new RecordDifference();
+                childDiff.setFieldName(field);
+                childDiff.setSourceValue(null);
+                childDiff.setTargetValue(targetOnlyRecord.getData().get(field));
+                childDiff.setDifferenceType(DifferenceType.TARGET_ONLY);
+                childDiff.setPrimaryKey(keyFields.contains(field));
+                if (keyFields.contains(field)) {
+                    childDiff.setPrimaryKeyName(field);
+                }
+                childDifferences.add(childDiff);
+            }
+            difference.setDifferences(childDifferences);
+            
             differences.add(difference);
         }
 

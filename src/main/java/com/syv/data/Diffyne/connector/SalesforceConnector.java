@@ -1,5 +1,6 @@
 package com.syv.data.Diffyne.connector;
 
+import com.syv.data.Diffyne.config.ComparisonConfig;
 import com.syv.data.Diffyne.model.DataSnapshot;
 import org.springframework.stereotype.Component;
 
