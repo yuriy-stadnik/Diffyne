@@ -10,17 +10,19 @@ Diffyne allows you to:
 - Detect differences between data sources without direct database connections
 - Identify records that exist in one source but not the other
 - Find field-level differences within matching records
+- Map fields between sources with different naming conventions or schemas
 - Configure tolerance levels for numeric comparisons
 - Schedule and manage comparison jobs
 
 ## Key Features
 
 - **REST-First Architecture**: All data access is through REST APIs, with no direct database connections
-- **Flexible Comparison**: Configure key fields, fields to compare, and tolerance levels
+- **Flexible Comparison**: Configure key fields, fields to compare with name mapping support for different schemas, and tolerance levels
 - **Multiple Source Types**: Support for comparing data from different source types (REST APIs, Kafka, etc.)
 - **In-Memory Storage**: Uses in-memory repositories for efficient runtime storage
 - **Comprehensive Analysis**: Detailed reports showing matched, mismatched, and unique records
 - **Field-Level Differences**: Identifies exactly which fields differ between records
+- **Field Name Mapping**: Map fields between sources with different schemas or naming conventions
 
 ## Usage Examples
 
@@ -42,7 +44,13 @@ curl -X POST "http://localhost:8080/api/direct-comparisons/rest-api" \
     },
     "comparisonConfig": {
       "keyFields": ["id"],
-      "fieldsToCompare": ["name", "email", "status", "balance"],
+      "fieldsToCompare": {
+        "name": "name",
+        "email": "email", 
+        "status": "status",
+        "balance": "balance",
+        "source_specific_field": "target_different_field_name"
+      },
       "toleranceLevels": {
         "balance": 0.1
       },
@@ -73,6 +81,28 @@ curl -X POST "http://localhost:8080/api/direct-comparisons/rest-api" \
 - **Connectors**: Adapters for different data source types (REST, Kafka, etc.)
 - **Models**: Data structures for comparisons, results, and differences
 - **Repositories**: In-memory storage interfaces for runtime data
+
+## Field Mapping
+
+Diffyne supports comparing data sources with different field naming conventions through field mapping. This is achieved by configuring the `fieldsToCompare` parameter as a map instead of an array:
+
+```json
+"fieldsToCompare": {
+  "source_field1": "target_field1",
+  "source_field2": "target_field2",
+  "common_field": "common_field"
+}
+```
+
+In this example:
+- `source_field1` in the source data will be compared with `target_field1` in the target data
+- `source_field2` in the source data will be compared with `target_field2` in the target data
+- Fields with the same name in both sources can be mapped with the same name
+
+This feature is particularly useful when:
+- Two systems use different naming conventions for the same data
+- You need to compare data across different database schemas
+- You're comparing data from systems that have evolved differently over time
 
 ## Testing
 

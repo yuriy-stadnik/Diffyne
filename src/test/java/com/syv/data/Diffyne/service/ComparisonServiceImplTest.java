@@ -59,7 +59,10 @@ class ComparisonServiceImplTest {
         // Create config
         config = new ComparisonConfig();
         config.setKeyFields(Collections.singleton("id"));
-        config.setFieldsToCompare(new HashSet<>(Arrays.asList("name", "value")));
+        Map<String, String> fieldsMap = new HashMap<>();
+        fieldsMap.put("name", "name");
+        fieldsMap.put("value", "value");
+        config.setFieldsToCompare(fieldsMap);
 
         // Create source snapshot
         sourceSnapshot = new DataSnapshot();

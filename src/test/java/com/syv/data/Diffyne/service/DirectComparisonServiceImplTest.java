@@ -56,7 +56,10 @@ class DirectComparisonServiceImplTest {
         // Create config
         config = new ComparisonConfig();
         config.setKeyFields(Collections.singleton("id"));
-        config.setFieldsToCompare(new HashSet<>(Arrays.asList("name", "value")));
+        Map<String, String> fieldsMap = new HashMap<>();
+        fieldsMap.put("name", "name");
+        fieldsMap.put("value", "value");
+        config.setFieldsToCompare(fieldsMap);
 
         // Create source snapshot
         sourceSnapshot = new DataSnapshot();
@@ -171,13 +174,14 @@ class DirectComparisonServiceImplTest {
         // Verify that parameters were correctly passed with URL added
         verify(restApiConnector).extractSnapshot(eq(sourceOneUrl), argThat(params -> 
                 params.containsKey("url") && params.get("url").equals(sourceOneUrl) &&
-                params.containsKey("authToken") && params.get("authToken").equals("source-token") &&
-                params.containsKey("recordsPath") && params.get("recordsPath").equals("data.items")
+                params.containsKey("authToken") && params.get("authToken").equals("TEST_SOURCE_TOKEN") &&
+                params.containsKey("recordsPath") && params.get("recordsPath").equals("data.items") &&
+                params.containsKey("primaryKeyField") && params.get("primaryKeyField").equals("id")
         ));
         
         verify(restApiConnector).extractSnapshot(eq(sourceTwoUrl), argThat(params -> 
                 params.containsKey("url") && params.get("url").equals(sourceTwoUrl) &&
-                params.containsKey("authToken") && params.get("authToken").equals("target-token") &&
+                params.containsKey("authToken") && params.get("authToken").equals("TEST_TARGET_TOKEN") &&
                 params.containsKey("primaryKeyField") && params.get("primaryKeyField").equals("itemId")
         ));
         
@@ -215,12 +219,14 @@ class DirectComparisonServiceImplTest {
         // Verify that default empty maps were created and URL was still added
         verify(restApiConnector).extractSnapshot(eq(sourceOneUrl), argThat(params -> 
                 params.containsKey("url") && params.get("url").equals(sourceOneUrl) &&
-                params.size() == 1 // Only URL parameter
+                params.containsKey("primaryKeyField") && params.get("primaryKeyField").equals("id") &&
+                params.size() == 2 // URL and primaryKeyField parameters
         ));
         
         verify(restApiConnector).extractSnapshot(eq(sourceTwoUrl), argThat(params -> 
                 params.containsKey("url") && params.get("url").equals(sourceTwoUrl) &&
-                params.size() == 1 // Only URL parameter
+                params.containsKey("primaryKeyField") && params.get("primaryKeyField").equals("id") &&
+                params.size() == 2 // URL and primaryKeyField parameters
         ));
     }
 

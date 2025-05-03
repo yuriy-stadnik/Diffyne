@@ -8,7 +8,7 @@ import java.util.Set;
 @Data
 public class ComparisonConfig {
     private Set<String> keyFields;
-    private Set<String> fieldsToCompare;
+    private Map<String, String> fieldsToCompare; // Maps source1 field names to source2 field names
     private Map<String, Double> toleranceLevels; // For numeric fields
     private boolean ignoreCase; // For string fields
     private boolean ignoreWhitespace;

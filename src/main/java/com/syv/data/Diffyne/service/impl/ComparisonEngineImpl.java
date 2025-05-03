@@ -86,11 +86,17 @@ public class ComparisonEngineImpl implements ComparisonEngine {
                 Set<String> fieldsToCompare = determineFieldsToCompare(config, sourceRecord, targetRecord);
                 boolean recordMatches = true;
 
-                for (String field : fieldsToCompare) {
-                    Object sourceValue = sourceRecord.getData().get(field);
-                    Object targetValue = targetRecord.getData().get(field);
+                for (String sourceField : fieldsToCompare) {
+                    // Get the corresponding target field using the mapping
+                    String targetField = sourceField;
+                    if (config.getFieldsToCompare() != null && config.getFieldsToCompare().containsKey(sourceField)) {
+                        targetField = config.getFieldsToCompare().get(sourceField);
+                    }
+                    
+                    Object sourceValue = sourceRecord.getData().get(sourceField);
+                    Object targetValue = targetRecord.getData().get(targetField);
 
-                    if (!areValuesEqual(sourceValue, targetValue, field, config)) {
+                    if (!areValuesEqual(sourceValue, targetValue, sourceField, config)) {
                         // Values don't match
                         recordMatches = false;
 
@@ -118,16 +124,21 @@ public class ComparisonEngineImpl implements ComparisonEngine {
                         // Create child difference for this field
                         RecordDifference fieldDifference = new RecordDifference();
                         fieldDifference.setPrimaryKeyValue(sourceRecord.getPrimaryKeyValue());
-                        fieldDifference.setFieldName(field);
+                        fieldDifference.setFieldName(sourceField);
                         fieldDifference.setSourceValue(sourceValue);
                         fieldDifference.setTargetValue(targetValue);
                         fieldDifference.setDifferenceType(DifferenceType.VALUE_MISMATCH);
                         
+                        // Store the mapped field name if different
+                        if (!sourceField.equals(targetField)) {
+                            fieldDifference.setTargetFieldName(targetField);
+                        }
+                        
                         // Set primary key information
                         for (String keyField : keyFields) {
-                            if (keyField.equals(field)) {
+                            if (keyField.equals(sourceField)) {
                                 fieldDifference.setPrimaryKey(true);
-                                fieldDifference.setPrimaryKeyName(field);
+                                fieldDifference.setPrimaryKeyName(sourceField);
                                 break;
                             }
                         }
@@ -222,7 +233,7 @@ public class ComparisonEngineImpl implements ComparisonEngine {
     private Set<String> determineFieldsToCompare(ComparisonConfig config, DataRecord sourceRecord, DataRecord targetRecord) {
         // If specific fields to compare are configured, use those
         if (config.getFieldsToCompare() != null && !config.getFieldsToCompare().isEmpty()) {
-            return config.getFieldsToCompare();
+            return config.getFieldsToCompare().keySet();
         }
 
         // Otherwise, compare all fields present in both records, except excluded ones

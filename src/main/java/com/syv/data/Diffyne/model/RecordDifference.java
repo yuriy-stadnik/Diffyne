@@ -8,6 +8,7 @@ import java.util.HashSet;
 public class RecordDifference {
     private String primaryKeyValue;
     private String fieldName;
+    private String targetFieldName; // Used when field names differ between sources
     private Object sourceValue;
     private Object targetValue;
     private DifferenceType differenceType;
