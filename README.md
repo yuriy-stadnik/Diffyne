@@ -7,7 +7,7 @@ Diffyne is a powerful tool for comparing data across different sources with a RE
 Diffyne allows you to:
 
 - Compare data from multiple REST API endpoints
-- Detect differences between data sources without direct database connections
+- Detect differences between data sources
 - Identify records that exist in one source but not the other
 - Find field-level differences within matching records
 - Map fields between sources with different naming conventions or schemas
@@ -16,7 +16,7 @@ Diffyne allows you to:
 
 ## Key Features
 
-- **REST-First Architecture**: All data access is through REST APIs, with no direct database connections
+- **REST-First Architecture**: All data access is through REST APIs
 - **Flexible Comparison**: Configure key fields, fields to compare with name mapping support for different schemas, and tolerance levels
 - **Multiple Source Types**: Support for comparing data from different source types (REST APIs, Kafka, etc.)
 - **In-Memory Storage**: Uses in-memory repositories for efficient runtime storage
@@ -29,18 +29,18 @@ Diffyne allows you to:
 ### Compare Two REST API Sources
 
 ```bash
-curl -X POST "http://localhost:8080/api/direct-comparisons/rest-api" \
+curl -X POST "http://localhost:8081/api/direct-comparisons/rest-api" \
   -H "Content-Type: application/json" \
   -d '{
-    "sourceOneUrl": "http://localhost:8080/rjp/query?connection=DB1&sqlQuery=select%20*%20from%20customer%20where%20id%3C800",
+    "sourceOneUrl": "https://api.source1.com/customers",
     "sourceOneParams": {
       "authToken": "<YOUR_SOURCE_API_TOKEN>",
       "recordsPath": "data.items"
     },
-    "sourceTwoUrl": "http://localhost:8080/rjp/query?connection=DB2&sqlQuery=select%20*%20from%20customer%20where%20id%3C800",
+    "sourceTwoUrl": "https://api.source2.com/users",
     "sourceTwoParams": {
       "authToken": "<YOUR_TARGET_API_TOKEN>",
-      "recordsPath": "data.items"
+      "recordsPath": "users"
     },
     "comparisonConfig": {
       "keyFields": ["id"],
@@ -67,12 +67,26 @@ curl -X POST "http://localhost:8080/api/direct-comparisons/rest-api" \
 - Spring Boot 3.4.4
 - Maven
 
+### Configuration
+
+The application runs with default settings and requires no additional configuration. You can customize behavior by creating an `application-local.properties` file in `src/main/resources/` if needed:
+
+```properties
+# Server configuration
+server.port=8081
+
+# Logging configuration
+logging.level.com.syv.data.Diffyne=INFO
+```
+
 ### Running the Application
 
 ```bash
 ./mvnw clean install
 ./mvnw spring-boot:run
 ```
+
+**Note**: The application is designed with a REST-first approach and uses in-memory storage for all operations.
 
 ## Project Structure
 
@@ -101,7 +115,7 @@ In this example:
 
 This feature is particularly useful when:
 - Two systems use different naming conventions for the same data
-- You need to compare data across different database schemas
+- You need to compare data across different API schemas
 - You're comparing data from systems that have evolved differently over time
 
 ## Testing
