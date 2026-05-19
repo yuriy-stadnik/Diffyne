@@ -1,25 +1,19 @@
-GET http://localhost:8080/rjp/query?connection=DB1&sqlQuery=select%20*%20from%20customer%20where%20id%3C800
-
-<> 2025-04-29T212809.200.json
-<> 2025-04-29T212629.200.json
-<> 2025-04-13T191946.200.json
-<> 2025-04-11T215919.200.json
-<> 2025-04-11T215647.200.json
+GET http://localhost:8080/rjp/query?connection=EXAMPLE_DB&sqlQuery=select%20*%20from%20customer%20where%20id%3C800
 
 ###
-POSR http://localhost:8081/api/direct-comparisons/rest-api
+POST http://localhost:8081/api/direct-comparisons/rest-api
 Content-Type: application/json
 
 {
-  "sourceOneUrl": "http://localhost:8081/rjp/query?connection=DB1&sqlQuery=select%20*%20from%20customer%20where%20id%3C800",
+  "sourceOneUrl": "http://localhost:8081/rjp/query?connection=EXAMPLE_DB_1&sqlQuery=select%20*%20from%20customer%20where%20id%3C800",
   "sourceOneParams": {
-    "authToken": "token1",
+    "authToken": "<SOURCE_API_TOKEN>",
     "headers": {"X-API-Version": "1.0"},
     "recordsPath": "$"
   },
-  "sourceTwoUrl": "http://localhost:8081/rjp/query?connection=DB1&sqlQuery=select%20*%20from%20customer%20where%20id%3C800",
+  "sourceTwoUrl": "http://localhost:8081/rjp/query?connection=EXAMPLE_DB_2&sqlQuery=select%20*%20from%20customer%20where%20id%3C800",
   "sourceTwoParams": {
-    "authToken": "token2",
+    "authToken": "<TARGET_API_TOKEN>",
     "headers": {"Accept": "application/json"},
     "recordsPath": "$"
   },
@@ -30,24 +24,19 @@ Content-Type: application/json
   }
 }
 
-<> 2025-04-29T212805.405.json
-<> 2025-04-13T192134.405.json
-
-
-
 ###
 # curl -X POST "http://localhost:8080/api/direct-comparisons/rest-api"
 #    -H "Content-Type: application/json"
 #    -d '{
-#      "sourceOneUrl": "http://localhost:8080/rjp/query?connection=DB1&sqlQuery=select%20*%20from%20customer%20where%20id%3C800",
+#      "sourceOneUrl": "http://localhost:8080/rjp/query?connection=EXAMPLE_DB_1&sqlQuery=select%20*%20from%20customer%20where%20id%3C800",
 #      "sourceOneParams": {
-#        "authToken": "source-api-token",
+#        "authToken": "<SOURCE_API_TOKEN>",
 #        "recordsPath": "data.items",
 #        "primaryKeyField": "id"
 #      },
-#      "sourceTwoUrl": "http://localhost:8080/rjp/query?connection=DB2&sqlQuery=select%20*%20from%20customer%20where%20id%3C800",
+#      "sourceTwoUrl": "http://localhost:8080/rjp/query?connection=EXAMPLE_DB_2&sqlQuery=select%20*%20from%20customer%20where%20id%3C800",
 #      "sourceTwoParams": {
-#        "authToken": "target-api-token",
+#        "authToken": "<TARGET_API_TOKEN>",
 #        "recordsPath": "data.items",
 #        "primaryKeyField": "id"
 #      },
@@ -66,15 +55,15 @@ POST http://localhost:8081/api/direct-comparisons/rest-api
 Content-Type: application/json
 
 {
-  "sourceOneUrl": "http://localhost:8080/rjp/query?connection=DB1&sqlQuery=select * from customer where id < 800",
+  "sourceOneUrl": "http://localhost:8080/rjp/query?connection=EXAMPLE_DB_1&sqlQuery=select * from customer where id < 800",
   "sourceOneParams": {
-    "authToken": "source-api-token",
+    "authToken": "<SOURCE_API_TOKEN>",
     "recordsPath": "$",
     "primaryKeyField": "ID"
   },
-  "sourceTwoUrl": "http://localhost:8080/rjp/query?connection=DB2&sqlQuery=select * from customer where id < 8",
+  "sourceTwoUrl": "http://localhost:8080/rjp/query?connection=EXAMPLE_DB_2&sqlQuery=select * from customer where id < 8",
   "sourceTwoParams": {
-    "authToken": "target-api-token",
+    "authToken": "<TARGET_API_TOKEN>",
     "recordsPath": "$",
     "primaryKeyField": "ID"
   },
@@ -92,10 +81,4 @@ Content-Type: application/json
   "comparisonName": "Customer Data Comparison"
 }
 
-<> 2025-04-29T212859.200.json
-<> 2025-04-29T212750.200.json
-<> 2025-04-13T225959.200.json
-
-
 ###
-
