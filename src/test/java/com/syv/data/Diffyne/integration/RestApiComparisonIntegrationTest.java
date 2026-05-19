@@ -10,22 +10,14 @@ import com.syv.data.Diffyne.model.ComparisonResult;
 import com.syv.data.Diffyne.model.DifferenceType;
 import com.syv.data.Diffyne.model.RecordDifference;
 import com.syv.data.Diffyne.service.DirectComparisonService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.client.ExpectedCount;
-import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -35,8 +27,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -49,20 +39,10 @@ public class RestApiComparisonIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
     @MockBean
     private DirectComparisonService directComparisonService;
-
-    private MockRestServiceServer mockServer;
-
-    @BeforeEach
-    void setUp() {
-        mockServer = MockRestServiceServer.createServer(restTemplate);
-    }
 
     @Test
     void compareRestDataSources() throws Exception {
@@ -73,28 +53,10 @@ public class RestApiComparisonIntegrationTest {
         // Configure mock server to respond to source API request
         String sourceUrl = "http://localhost:8080/rjp/query?connection=DB1&sqlQuery="
                 + URLEncoder.encode("select * from customer whereid in (10,11)", StandardCharsets.UTF_8);
-        
-//        mockServer.expect(ExpectedCount.once(),
-//                requestTo(new URI(sourceUrl)))
-//                .andExpect(method(HttpMethod.GET))
-//                .andRespond(withStatus(HttpStatus.OK)
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .body(objectMapper.writeValueAsString(sourceData)));
-//
-//        mockServer.verify();
-//
         // Configure mock server to respond to target API request
         String targetUrl = "http://localhost:8080/rjp/query?connection=DB2&sqlQuery="
                 + URLEncoder.encode("select * from customer where id in (10,11)", StandardCharsets.UTF_8);
-//
-//        mockServer.expect(ExpectedCount.once(),
-//                requestTo(new URI(targetUrl)))
-//                .andExpect(method(HttpMethod.GET))
-//                .andRespond(withStatus(HttpStatus.OK)
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .body(objectMapper.writeValueAsString(targetData)));
-//
-//        mockServer.verify();
+
         // Create comparison config
         ComparisonConfig config = createComparisonConfig();
 
@@ -198,14 +160,12 @@ public class RestApiComparisonIntegrationTest {
         keyFields.add("id");
         config.setKeyFields(keyFields);
         
-        // Compare all fields
-        Set<String> fieldsToCompare = new HashSet<>();
-        fieldsToCompare.add("name");
-        fieldsToCompare.add("email");
-        fieldsToCompare.add("status");
-        fieldsToCompare.add("balance");
-        fieldsToCompare.add("created_date");
-        config.setFieldsToCompare(fieldsToCompare);
+        config.setFieldsToCompare(Map.of(
+                "name", "name",
+                "email", "email",
+                "status", "status",
+                "balance", "balance",
+                "created_date", "created_date"));
         
         // Set tolerance for numeric fields
         Map<String, Double> toleranceLevels = new HashMap<>();

@@ -81,7 +81,10 @@ class DirectComparisonControllerTest {
         // Create comparison config
         ComparisonConfig config = new ComparisonConfig();
         config.setKeyFields(Collections.singleton("id"));
-        config.setFieldsToCompare(Set.of("name", "value"));
+        Map<String, String> fieldsMap = new HashMap<>();
+        fieldsMap.put("name", "name");
+        fieldsMap.put("value", "value");
+        config.setFieldsToCompare(fieldsMap);
         config.setIgnoreCase(true);
         
         // Create source params
