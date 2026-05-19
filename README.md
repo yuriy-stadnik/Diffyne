@@ -18,45 +18,115 @@ Diffyne allows you to:
 
 - **REST-First Architecture**: All data access is through REST APIs
 - **Flexible Comparison**: Configure key fields, fields to compare with name mapping support for different schemas, and tolerance levels
-- **Multiple Source Types**: Support for comparing data from different source types (REST APIs, Kafka, etc.)
+- **Connector Abstraction**: REST API connectors are implemented today, with Kafka and Salesforce connectors present as scaffolding for future work
 - **In-Memory Storage**: Uses in-memory repositories for efficient runtime storage
 - **Comprehensive Analysis**: Detailed reports showing matched, mismatched, and unique records
 - **Field-Level Differences**: Identifies exactly which fields differ between records
 - **Field Name Mapping**: Map fields between sources with different schemas or naming conventions
 
+
+
+![Diffyne demo flow](chart/Flow.png)
 ## Usage Examples
 
-### Compare Two REST API Sources
+The `demo/` folder contains a runnable Docker Compose demo with three Java Spring Boot services:
+
+- `source-api`: this Java Spring Boot app with the `demo-source` profile on port `9001`
+- `target-api`: this Java Spring Boot app with the `demo-target` profile on port `9002`
+- `diffyne`: this Spring Boot app on port `8081`
+
+
+
+Run the demo:
 
 ```bash
-curl -X POST "http://localhost:8081/api/direct-comparisons/rest-api" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "sourceOneUrl": "https://api.source1.com/customers",
-    "sourceOneParams": {
-      "authToken": "<YOUR_SOURCE_API_TOKEN>",
-      "recordsPath": "data.items"
+./demo/run-demo.sh
+```
+
+The script builds and starts the services, calls Diffyne's direct REST comparison endpoint, and saves the live response to `demo/latest-output.json`. The request body used by the script is stored in `demo/request.json`, and the expected summarized result is stored in `demo/example-output.json`.
+
+Stop the demo services when finished:
+
+```bash
+docker compose -f demo/docker-compose.yml down
+```
+
+The source REST input is served by `GET http://source-api:9001/customers`:
+
+```json
+[
+  {"id": "C-001", "name": "Alice Jones", "status": "active", "balance": 100.0},
+  {"id": "C-002", "name": "Bob Smith", "status": "active", "balance": 200.0},
+  {"id": "C-003", "name": "Carol White", "status": "inactive", "balance": 300.0},
+  {"id": "C-004", "name": "Source Only", "status": "pending", "balance": 400.0}
+]
+```
+
+The target REST input is served by `GET http://target-api:9002/customers`:
+
+```json
+[
+  {"id": "C-001", "name": "Alice Jones", "status": "active", "balance": 100.0},
+  {"id": "C-002", "name": "Bob Smith", "status": "suspended", "balance": 200.0},
+  {"id": "C-003", "name": "Carol White", "status": "inactive", "balance": 300.05},
+  {"id": "C-005", "name": "Target Only", "status": "active", "balance": 500.0}
+]
+```
+
+Diffyne compares those inputs with `POST http://diffyne:8081/api/direct-comparisons/rest-api`:
+
+```json
+{
+  "sourceOneUrl": "http://source-api:9001/customers",
+  "sourceOneParams": {
+    "recordsPath": "$",
+    "primaryKeyField": "id"
+  },
+  "sourceTwoUrl": "http://target-api:9002/customers",
+  "sourceTwoParams": {
+    "recordsPath": "$",
+    "primaryKeyField": "id"
+  },
+  "comparisonConfig": {
+    "keyFields": ["id"],
+    "fieldsToCompare": {
+      "name": "name",
+      "status": "status",
+      "balance": "balance"
     },
-    "sourceTwoUrl": "https://api.source2.com/users",
-    "sourceTwoParams": {
-      "authToken": "<YOUR_TARGET_API_TOKEN>",
-      "recordsPath": "users"
+    "toleranceLevels": {
+      "balance": 0.1
     },
-    "comparisonConfig": {
-      "keyFields": ["id"],
-      "fieldsToCompare": {
-        "name": "name",
-        "email": "email", 
-        "status": "status",
-        "balance": "balance",
-        "source_specific_field": "target_different_field_name"
-      },
-      "toleranceLevels": {
-        "balance": 0.1
-      },
-      "ignoreCase": true
-    }
-  }'
+    "ignoreCase": false,
+    "ignoreWhitespace": true
+  },
+  "comparisonName": "Demo customer comparison"
+}
+```
+
+The saved output example shows the intended categories:
+
+```json
+{
+  "totalRecords": 5,
+  "matchedRecords": 2,
+  "mismatchedRecords": 1,
+  "sourceOnlyRecords": 1,
+  "targetOnlyRecords": 1,
+  "exampleRecords": {
+    "matched": ["C-001", "C-003"],
+    "mismatched": [
+      {
+        "id": "C-002",
+        "field": "status",
+        "sourceValue": "active",
+        "targetValue": "suspended"
+      }
+    ],
+    "sourceOnly": ["C-004"],
+    "targetOnly": ["C-005"]
+  }
+}
 ```
 
 ## Setup & Configuration
@@ -88,11 +158,13 @@ logging.level.com.syv.data.Diffyne=INFO
 
 **Note**: The application is designed with a REST-first approach and uses in-memory storage for all operations.
 
+Kafka and Salesforce connector classes exist in the codebase, but they are currently stubs and should not be described as supported integrations.
+
 ## Project Structure
 
 - **Controllers**: REST endpoints for triggering comparisons and retrieving results
 - **Services**: Core comparison and data extraction logic
-- **Connectors**: Adapters for different data source types (REST, Kafka, etc.)
+- **Connectors**: Adapters for REST API data sources, plus placeholder connector types for future integrations
 - **Models**: Data structures for comparisons, results, and differences
 - **Repositories**: In-memory storage interfaces for runtime data
 
@@ -129,3 +201,12 @@ The project includes comprehensive unit and integration tests for all components
 # Run a specific test
 ./mvnw test -Dtest=DirectComparisonControllerTest
 ```
+
+## LLM Analysis Snapshot
+
+To aggregate the significant project files into a single text file for LLM analysis:
+
+- macOS or Linux: `./aggregate-for-llm.command`
+- Windows: `aggregate-for-llm.bat`
+
+The default output is `.llm-analysis/diffyne-llm-context.txt` in the project root.

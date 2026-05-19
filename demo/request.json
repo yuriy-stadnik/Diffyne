@@ -1,6 +1,3 @@
-POST http://localhost:8081/api/direct-comparisons/rest-api
-Content-Type: application/json
-
 {
   "sourceOneUrl": "http://source-api:9001/customers",
   "sourceOneParams": {

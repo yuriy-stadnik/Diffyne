@@ -1,0 +1,30 @@
+services:
+  source-api:
+    build:
+      context: ..
+      dockerfile: demo/Dockerfile.diffyne
+    environment:
+      SPRING_PROFILES_ACTIVE: demo-source
+      SERVER_PORT: 9001
+    ports:
+      - "9001:9001"
+
+  target-api:
+    build:
+      context: ..
+      dockerfile: demo/Dockerfile.diffyne
+    environment:
+      SPRING_PROFILES_ACTIVE: demo-target
+      SERVER_PORT: 9002
+    ports:
+      - "9002:9002"
+
+  diffyne:
+    build:
+      context: ..
+      dockerfile: demo/Dockerfile.diffyne
+    depends_on:
+      - source-api
+      - target-api
+    ports:
+      - "8081:8081"

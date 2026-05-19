@@ -1,84 +1,35 @@
-GET http://localhost:8080/rjp/query?connection=EXAMPLE_DB&sqlQuery=select%20*%20from%20customer%20where%20id%3C800
+GET http://localhost:9001/customers
+
+###
+GET http://localhost:9002/customers
 
 ###
 POST http://localhost:8081/api/direct-comparisons/rest-api
 Content-Type: application/json
 
 {
-  "sourceOneUrl": "http://localhost:8081/rjp/query?connection=EXAMPLE_DB_1&sqlQuery=select%20*%20from%20customer%20where%20id%3C800",
+  "sourceOneUrl": "http://source-api:9001/customers",
   "sourceOneParams": {
-    "authToken": "<SOURCE_API_TOKEN>",
-    "headers": {"X-API-Version": "1.0"},
-    "recordsPath": "$"
+    "recordsPath": "$",
+    "primaryKeyField": "id"
   },
-  "sourceTwoUrl": "http://localhost:8081/rjp/query?connection=EXAMPLE_DB_2&sqlQuery=select%20*%20from%20customer%20where%20id%3C800",
+  "sourceTwoUrl": "http://target-api:9002/customers",
   "sourceTwoParams": {
-    "authToken": "<TARGET_API_TOKEN>",
-    "headers": {"Accept": "application/json"},
-    "recordsPath": "$"
+    "recordsPath": "$",
+    "primaryKeyField": "id"
   },
   "comparisonConfig": {
     "keyFields": ["id"],
-    "fieldsToCompare": ["name", "email", "status"],
-    "ignoreCase": true
-  }
-}
-
-###
-# curl -X POST "http://localhost:8080/api/direct-comparisons/rest-api"
-#    -H "Content-Type: application/json"
-#    -d '{
-#      "sourceOneUrl": "http://localhost:8080/rjp/query?connection=EXAMPLE_DB_1&sqlQuery=select%20*%20from%20customer%20where%20id%3C800",
-#      "sourceOneParams": {
-#        "authToken": "<SOURCE_API_TOKEN>",
-#        "recordsPath": "data.items",
-#        "primaryKeyField": "id"
-#      },
-#      "sourceTwoUrl": "http://localhost:8080/rjp/query?connection=EXAMPLE_DB_2&sqlQuery=select%20*%20from%20customer%20where%20id%3C800",
-#      "sourceTwoParams": {
-#        "authToken": "<TARGET_API_TOKEN>",
-#        "recordsPath": "data.items",
-#        "primaryKeyField": "id"
-#      },
-#      "comparisonConfig": {
-#        "keyFields": ["id"],
-#        "fieldsToCompare": ["name", "email", "status", "balance", "created_date"],
-#        "toleranceLevels": {
-#          "balance": 0.1
-#        },
-#        "ignoreCase": true,
-#        "ignoreWhitespace": true
-#      },
-#      "comparisonName": "Customer Data Comparison"
-#    }'
-POST http://localhost:8081/api/direct-comparisons/rest-api
-Content-Type: application/json
-
-{
-  "sourceOneUrl": "http://localhost:8080/rjp/query?connection=EXAMPLE_DB_1&sqlQuery=select * from customer where id < 800",
-  "sourceOneParams": {
-    "authToken": "<SOURCE_API_TOKEN>",
-    "recordsPath": "$",
-    "primaryKeyField": "ID"
-  },
-  "sourceTwoUrl": "http://localhost:8080/rjp/query?connection=EXAMPLE_DB_2&sqlQuery=select * from customer where id < 8",
-  "sourceTwoParams": {
-    "authToken": "<TARGET_API_TOKEN>",
-    "recordsPath": "$",
-    "primaryKeyField": "ID"
-  },
-  "comparisonConfig": {
-    "keyFields": [
-      "ID"
-    ],
-    "fieldsToCompare": [
-      "FIRST_NAME",
-      "LAST_NAME"
-    ],
-    "ignoreCase": true,
+    "fieldsToCompare": {
+      "name": "name",
+      "status": "status",
+      "balance": "balance"
+    },
+    "toleranceLevels": {
+      "balance": 0.1
+    },
+    "ignoreCase": false,
     "ignoreWhitespace": true
   },
-  "comparisonName": "Customer Data Comparison"
+  "comparisonName": "Demo customer comparison"
 }
-
-###

@@ -1,0 +1,20 @@
+{
+  "totalRecords": 5,
+  "matchedRecords": 2,
+  "mismatchedRecords": 1,
+  "sourceOnlyRecords": 1,
+  "targetOnlyRecords": 1,
+  "exampleRecords": {
+    "matched": ["C-001", "C-003"],
+    "mismatched": [
+      {
+        "id": "C-002",
+        "field": "status",
+        "sourceValue": "active",
+        "targetValue": "suspended"
+      }
+    ],
+    "sourceOnly": ["C-004"],
+    "targetOnly": ["C-005"]
+  }
+}
